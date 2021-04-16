@@ -19,6 +19,62 @@ Aca les voy a mostrar el codigo de mi Landing Page:
 
 ### Markdown
 
+Formik tiene 3 "momentos" muy importantes en el codigo, el primero es la definicion de los valores iniciales que van a tener los campos de nuestro form:
+```
+const initialValues={
+        nombre: "",
+        email:"",
+        message: "",
+        asunto: ""
+    };
+```
+
+El segundo es la creacion del objeto Formik:
+```
+    const formik = useFormik({
+      initialValues,
+      onSubmit,
+      validationSchema  
+    });
+```
+
+Aqui tenemos, por un lado los valores iniciales, la funcion que se ejecutara en el submit del form (onSubmit), y el esquema de validacion, aqui es cuando entra el tercer "momento" mas importante de nuestro formulario, y que consta en la creacion de la logica de validacion de los campos.
+
+```
+const validationSchema= Yup.object({
+        email: Yup.string()
+            .email('Mail invalido')
+            .required('Reuqerido'),
+        nombre: Yup.string()
+            .max(200,'El nombre con 200 caracteres maximo')
+            .required('Requerido'),
+        message: Yup.string()
+            .required('El mensaje no puede estar vacio')
+    });
+```
+
+Una vez creado el objeto formik con sus validaciones y sus valores iniciales no queda mas que llamarlo desde la configuracion de los inputs del html desde el retorno de nuestro componente.
+
+```
+    <div className="col-sm-3 col-lg-3 col-12 mt-sm-0 mt-lg-0 mt-2">
+        <input 
+            type="text" 
+            name="nombre" 
+            placeholder="Nombre" 
+            className={formik.touched.nombre && formik.errors.nombre
+                ? "form-control is-invalid"
+                : "form-control"
+            }
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.nombre}
+        />
+    </div>
+```
+
+
+
+Por si te hace falta o preferis ver el codigo completo, aca lo dejo:
 
 ```
 import './Contact.css'
