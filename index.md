@@ -40,6 +40,8 @@ El segundo es la creacion del objeto Formik:
 
 Aqui tenemos, por un lado los valores iniciales, la funcion que se ejecutara en el submit del form (onSubmit), y el esquema de validacion, aqui es cuando entra el tercer "momento" mas importante de nuestro formulario, y que consta en la creacion de la logica de validacion de los campos.
 
+***Lo primero que tengo que avisar, que parecera obvio para quienes ya sepan React, YUP matchea con el nomnbre del input, por lo que las claves del objeto YUP deben ser las mismas que en nuestro formualrio.
+
 ```
 const validationSchema= Yup.object({
         email: Yup.string()
@@ -51,6 +53,30 @@ const validationSchema= Yup.object({
         message: Yup.string()
             .required('El mensaje no puede estar vacio')
     });
+```
+
+Si estuviesemos haciendo un formulario de registro con confirmacion de contraseña, la comparacion de passwords se hace de la siguiente manera:
+```
+        password: Yup.string()
+            .required('Debe ingresar una contraseña')
+            .min(8, 'Debe Contener al menos 8 caracteres')
+            ,
+        passwordConfirmation: Yup.string()
+            .when("password", {
+            is: val => (val && val.length > 0 ),
+            then: Yup.string().oneOf(
+                [Yup.ref("password")],
+                "Las contraseñas deben coincidir"
+            )
+        })
+            .required('Debe reingresar la contraseña')
+```
+Esta vsalidacion lo que hace es, en primer lugar verificar que el campo password sea valido, validando que este campo no es vacio, y posteriormente comparandolo con el campo password. Por ultimo colocamos que el campo es requerido, ya que si no la contraseña se verifica incluso cuando estamos escribiendo el password y no el passwordconfirmation. Todo esto tiene que ser completado con un operador ternario en el retorno HTML debajo del input del passwordConfirmation.
+
+```
+        { formik.touched.passwordConfirmation && formik.errors.passwordConfirmation ? (
+            <div className='alert-danger bordiado'>{formik.errors.passwordConfirmation}</div>
+        ) : null}
 ```
 
 Una vez creado el objeto formik con sus validaciones y sus valores iniciales no queda mas que llamarlo desde la configuracion de los inputs del html desde el retorno de nuestro componente.
