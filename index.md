@@ -1,34 +1,241 @@
 ## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/garsiv1932/formik/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+La creación de formularios en el desarrollo front end tiene sus complicaciones.Hay muchos factores que considerar: cambios de los campos, validaciones, submit...
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Poir esto mismo, en React se ha popularizado la librería Formik para la gestión de formularios, junto con YUP para las validaciones, nos proporcionan las herramientas para generar formularios de una manera rápida, sencilla y eficiente.
+
+Alos bifes
+
+Lo primero, instalar FORMIK y YUP:
+(Esto mismo lo pedes hacer con Yarn)
+
+```
+npm install formik --save
+npm install -S yup
+```
+(Simplemente dos formas distintas de hacer lo mismo).
+
+Aca les voy a mostrar el codigo de mi Landing Page:
 
 ### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
 ```
+import './Contact.css'
+import React, {useEffect, useState} from 'react';
+import {useFormik} from 'formik';
+import * as Yup from 'yup'
+import emailjs from 'emailjs-com';
+import  ReCaptcha  from  'google-recaptcha-react-component';
+
+function Contact(){
+    
+    function recaptchaLoaded(){
+        setCatpcha(true);
+        console.log("cargo la concha de la lora");
+    }
+    
+    const [captcha, setCatpcha] = useState(false);
+    const [result, setResult] = useState("");
+    
+    
+    const initialValues={
+        nombre: "",
+        email:"",
+        message: "",
+        asunto: ""
+    };
+
+    const validationSchema= Yup.object({
+        email: Yup.string()
+            .email('Mail invalido')
+            .required('Reuqerido'),
+        nombre: Yup.string()
+            .max(200,'El nombre con 200 caracteres maximo')
+            .required('Requerido'),
+        message: Yup.string()
+            .required('El mensaje no puede estar vacio')
+    });
+
+    const formik = useFormik({
+      initialValues,
+      onSubmit,
+      validationSchema  
+    });
+    
+    function onSubmit(values){
+        debugger;
+        // values.preventDefault();
+
+        emailjs.send('LlorachDevs', 'template_j6yxg58', values, 'user_q0voPPOe8Y8ioYfA6BlPV')
+            .then((result) => {
+                setResult(result.text)
+                console.log(result.text);
+            }, (error) => {
+                console.log(error.text);
+                setResult(error.text)
+
+            });
+        }
+
+    return(
+        <div className="container-fluid mt-5 mb-5">
+            <div className="row justify-content-center">
+                <div className="col-sm-6 col-lg-6 col-12 text-center centerdiv">
+                    <h1>Contacto</h1>
+                    <p>Americo Vespucio 1445, Montevideo, 11700</p>
+                    <p>llorach.pablo@llorachdevs.com</p>
+                    <p>+59891211845</p>
+                </div>
+    
+                <div className="col-sm-6 col-lg-6 col-12 ">
+                    <form onSubmit={formik.handleSubmit}>
+                        <div className="row justify-content-center">
+                            <div className="col-sm-3 col-lg-3 col-12 mt-sm-0 mt-lg-0 mt-2">
+                                <input 
+                                    type="text" 
+                                    name="nombre" 
+                                    placeholder="Nombre" 
+                                    className={formik.touched.nombre && formik.errors.nombre
+                                        ? "form-control is-invalid"
+                                        : "form-control"
+                                    }
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.nombre}
+                                />
+                            </div>
+                                
+                            <div className="col-sm-3 col-lg-3 col-12 mt-sm-0 mt-lg-0 mt-2">
+                                <input type="text" name="telefono" placeholder="Telefono" className="form-control"/>
+                            </div>
+                        </div>
+                        <div className="row justify-content-center mt-2">
+                            <div className="col-sm-6 col-lg-6 col-12">
+                                <input 
+                                    type="email" 
+                                    name="email" 
+                                    id="email" 
+                                    placeholder="Email" 
+                                    className={formik.touched.email && formik.errors.email
+                                ? "form-control is-invalid" : "form-control"}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.email}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="row justify-content-center mt-2">
+                            <div className="col-sm-6 col-lg-6 col-12">
+                                <input 
+                                    type="text" 
+                                    name="asunto" 
+                                    placeholder="Asunto" 
+                                    className="form-control"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.asunto}
+                                />
+                            </div>
+                        </div>
+
+    
+                        <div className="row justify-content-center mt-2">
+                            <div className="col-sm-6 col-lg-6 col-12">
+                                <textarea
+                                    className= { formik.touched.message && formik.errors.message
+                                            ? "form-control is-invalid"
+                                            : "form-control"
+                                    }
+                                    name="message"
+                                    rows="4"
+                                    placeholder="Escriba su mensaje aqui..."
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.message}
+                                />
+                                <div 
+                                    className={(formik.touched.message && formik.errors.message) || (formik.touched.email && formik.errors.email) || (formik.touched.nombre && formik.errors.nombre)
+                                    ?
+                                    "error-messages alert-danger"
+                                    :
+                                    "error-messages"
+                                    }
+                                >
+                                    
+                                { (formik.touched.message && formik.errors.message) 
+                                    ?
+                                    <div className="bordiado ">{formik.errors.message}</div>
+                                    :
+                                    <div className="bordiado"></div>
+                                }
+                                
+                                { (formik.touched.email && formik.errors.email)
+                                    ? 
+                                    <div className="bordiado">{formik.errors.email}</div>
+                                    : 
+                                    <div className="bordiado"></div>
+                                }
+                                
+                                { (formik.touched.nombre && formik.errors.nombre)
+                                ?
+                                <div className="bordiado">{formik.errors.nombre}</div>
+                                : 
+                                <div className="bordiado"></div>
+                                }
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row justify-content-center">
+                            <div className="col-sm-6 col-lg-6 col-12">
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-dark btn-block"
+                                    disabled=
+                                    {
+                                        !formik.errors.message && !formik.errors.email && !formik.errors.nombre && captcha 
+                                            ? null 
+                                            : 
+                                            "disabled"
+                                    }
+                                >Enviar</button>
+                            </div>
+                        </div>
+                        { result !== ""
+                            ?
+                            <div className="row justify-content-center">
+                                <div className="col-sm-6 col-lg-6 col-12">
+                                    <p className="text-danger alert-danger bordiado mt-1">{result}</p>
+                                </div>
+                            </div>
+                            :null
+                        }
+                    </form>
+                    <div className="row justify-content-center">
+                        <div className="col-sm-6 col-lg-6 col-12">
+                            <ReCaptcha
+                                token='XXXXXXXXXXXXXXXXXXXXX'
+                                onSuccess={recaptchaLoaded}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+```
+
+
+
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
+### Referencias
+
+
 
 Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/garsiv1932/formik/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
